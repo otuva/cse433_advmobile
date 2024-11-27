@@ -81,9 +81,9 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             const ListTile(
               leading:
-                  CircleAvatar(backgroundImage: AssetImage('assets/photo.png')),
+                  CircleAvatar(),
               title: Text(
-                'ONUR ALP AKIN',
+                'admin',
                 style: TextStyle(fontSize: 15),
               ),
               subtitle: Text(
