@@ -6,10 +6,6 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("About"),
-        backgroundColor: Colors.orangeAccent,
-      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -36,7 +32,7 @@ class AboutScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       Image.asset(
-                        'assets/library.png',
+                        'assets/images/library.png',
                         height: 150,
                       ),
                       const SizedBox(height: 20),

@@ -31,7 +31,7 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 50),
                   Hero(
                     tag: 'library_logo',
-                    child: Image.asset('assets/library.png',
+                    child: Image.asset('assets/images/library.png',
                         width: 200, height: 200),
                   ),
                   const SizedBox(height: 20),

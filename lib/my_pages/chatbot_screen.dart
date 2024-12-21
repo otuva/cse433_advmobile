@@ -1,7 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
+// ignore: camel_case_types
 class chatbotScreen extends StatefulWidget {
   const chatbotScreen({super.key});
 
@@ -9,10 +9,12 @@ class chatbotScreen extends StatefulWidget {
   State<chatbotScreen> createState() => _chatbotScreenState();
 }
 
+// ignore: camel_case_types
 class _chatbotScreenState extends State<chatbotScreen> {
   final TextEditingController _controller = TextEditingController();
   final List<Map<String, dynamic>> _messages = [];
   late GenerativeModel _model;
+  // ignore: prefer_typing_uninitialized_variables
   late var _chat;
 
   @override

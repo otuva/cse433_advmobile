@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'member_detail_screen.dart';
 
 class Member {
@@ -6,13 +7,35 @@ class Member {
   final String email;
   final String image;
   final String description;
+  final String id;
 
   Member({
     required this.name,
     required this.email,
     required this.image,
     required this.description,
+    required this.id,
   });
+
+  factory Member.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+    Map<String, dynamic> data = doc.data() ?? {};
+    return Member(
+      name: data['name'] ?? 'Unknown',
+      email: data['email'] ?? 'Unknown',
+      image: data['image'] ?? 'https://via.placeholder.com/150',
+      description: data['description'] ?? 'No description provided.',
+      id: doc.id,
+    );
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'name': name,
+      'email': email,
+      'image': image,
+      'description': description,
+    };
+  }
 }
 
 class MembersScreen extends StatefulWidget {
@@ -23,15 +46,29 @@ class MembersScreen extends StatefulWidget {
 }
 
 class _MembersScreenState extends State<MembersScreen> {
-  final List<Member> _members = []; // Start with an empty list
+  List<Member> _members = [];
   List<Member> _filteredMembers = [];
   final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _filteredMembers = _members;
+    _fetchMembers();
     _searchController.addListener(_filterMembers);
+  }
+
+  Future<void> _fetchMembers() async {
+    try {
+      final QuerySnapshot<Map<String, dynamic>> snapshot =
+          await FirebaseFirestore.instance.collection('members').get();
+      setState(() {
+        _members =
+            snapshot.docs.map((doc) => Member.fromFirestore(doc)).toList();
+        _filteredMembers = List.from(_members);
+      });
+    } catch (e) {
+      print('Error fetching members: $e');
+    }
   }
 
   void _filterMembers() {
@@ -44,23 +81,45 @@ class _MembersScreenState extends State<MembersScreen> {
     });
   }
 
-  void _addMember(String name, String email, String image, String description) {
-    setState(() {
-      _members.add(Member(
-        name: name,
-        email: email,
-        image: image,
-        description: description,
-      ));
-      _filterMembers();
-    });
+  void _addMember(
+      String name, String email, String image, String description) async {
+    try {
+      final DocumentReference<Map<String, dynamic>> docRef =
+          await FirebaseFirestore.instance.collection('members').add({
+        'name': name,
+        'email': email,
+        'image': image,
+        'description': description,
+      });
+
+      setState(() {
+        _members.add(Member(
+          name: name,
+          email: email,
+          image: image,
+          description: description,
+          id: docRef.id,
+        ));
+        _filterMembers();
+      });
+    } catch (e) {
+      print("Failed to add member: $e");
+    }
   }
 
-  void _removeMember(int index) {
-    setState(() {
-      _members.removeAt(index);
-      _filterMembers();
-    });
+  void _removeMember(String memberId, int index) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('members')
+          .doc(memberId)
+          .delete();
+      setState(() {
+        _members.removeWhere((member) => member.id == memberId);
+        _filteredMembers.removeAt(index);
+      });
+    } catch (e) {
+      print('Failed to remove member: $e');
+    }
   }
 
   void _showAddMemberDialog() {
@@ -114,10 +173,10 @@ class _MembersScreenState extends State<MembersScreen> {
                 );
                 Navigator.of(context).pop();
               },
-              child: const Text('Add'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
               ),
+              child: const Text('Add'),
             ),
           ],
         );
@@ -168,9 +227,7 @@ class _MembersScreenState extends State<MembersScreen> {
           ),
         ),
         body: _filteredMembers.isEmpty
-            ? const Center(
-                child: Text(
-                    'No members found.')) // Display message when list is empty
+            ? const Center(child: Text('No members found.'))
             : ListView.builder(
                 itemCount: _filteredMembers.length,
                 itemBuilder: (context, index) {
@@ -182,8 +239,7 @@ class _MembersScreenState extends State<MembersScreen> {
                       leading: Image.network(
                         member.image,
                         errorBuilder: (context, error, stackTrace) {
-                          return const Icon(Icons
-                              .person); // Placeholder icon if image fails to load
+                          return const Icon(Icons.person);
                         },
                       ),
                       title: Text(member.name),
@@ -192,15 +248,17 @@ class _MembersScreenState extends State<MembersScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                MemberDetailScreen(member: member),
+                            builder: (context) => MemberDetailScreen(
+                              member: member,
+                              memberId: '',
+                            ),
                           ),
                         );
                       },
                       trailing: IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
                         onPressed: () {
-                          _removeMember(index);
+                          _removeMember(member.id, index);
                         },
                       ),
                     ),
