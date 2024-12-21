@@ -1,0 +1,25 @@
+{
+    "flutter": {
+        "platforms": {
+            "android": {
+                "default": {
+                    "projectId": "bookmanagement-firebase-e5642",
+                    "appId": "1:1091845409879:android:b1d97a53bb335127c3a712",
+                    "fileOutput": "android/app/google-services.json"
+                }
+            },
+            "dart": {
+                "lib/firebase_options.dart": {
+                    "projectId": "bookmanagement-firebase-e5642",
+                    "configurations": {
+                        "android": "1:1091845409879:android:b1d97a53bb335127c3a712",
+                        "ios": "1:1091845409879:ios:4fe23b7594304e9cc3a712",
+                        "macos": "1:1091845409879:ios:4fe23b7594304e9cc3a712",
+                        "web": "1:1091845409879:web:9a8de4ed1b268f6ac3a712",
+                        "windows": "1:1091845409879:web:e1cde2404874863bc3a712"
+                    }
+                }
+            }
+        }
+    }
+}
